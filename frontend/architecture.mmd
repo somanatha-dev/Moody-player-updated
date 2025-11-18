@@ -1,0 +1,94 @@
+%% Moody Player — detailed architecture (Mermaid)
+
+flowchart LR
+
+  %% ========= Browser / Frontend =========
+  subgraph Browser [Frontend — Browser]
+    direction TB
+    UI["UI (React + Vite)"]
+    App["App.jsx\nPlayerContext (queue, index, volume)"]
+    AudioEl[["<audio> element (canonical playback)"]]
+    MoodComp["MoodSongs component\n(preview audio & controls)"]
+    FaceComp["FacialExpression component\n(face-api.js + @tensorflow/tfjs)"]
+    Models["/public/models\n(face-api models)"]
+    HTTPClient["HTTP client (axios / fetch)"]
+  end
+
+  %% ========= Backend =========
+  subgraph Backend [Backend — Express (Node.js)]
+    direction TB
+    Server((Express server))
+    Routes["Routes: GET /songs, POST /songs\n(src/routes/song.routes.js)"]
+    Multer["multer (memoryStorage) — handles multipart"]
+    Storage[("ImageKit Storage (uploads)")]
+    DB[("MongoDB (Mongoose)")]
+  end
+
+  %% ========= Flow / Labels =========
+  FaceComp -->|loads models| Models
+  FaceComp -->|local inference (face-api.js + tfjs)\n-> expression label| MoodComp
+
+
+
+    %% ----- Request / Response flow (explicit) -----
+    %% (1) Mood detection triggers request
+    MoodComp -->|1) GET /songs?mood=<mood> (request, axios)| HTTPClient
+    HTTPClient -->|forward request| Routes
+    Routes -->|2) query DB by mood (Mongoose)| DB
+    DB -->|2a) result: [ { title, artist, mood, audioUrl } ]| Routes
+    Routes -->|3) 200 OK + JSON payload| HTTPClient
+    HTTPClient -->|3) response (JSON)| MoodComp
+
+    %% ----- Upload lifecycle (explicit) -----
+    UI -->|POST /songs (multipart with audio file)| HTTPClient
+    HTTPClient -->|forward POST| Routes
+    Routes -->|multer parses multipart| Multer
+    Multer -->|buffer| Routes
+    Routes -->|upload buffer to ImageKit| Storage
+    Storage -->|201 Created + asset URL| Routes
+    Routes -->|save metadata (audio URL) using Mongoose| DB
+    DB -->|201 Created (song doc)| Routes
+    Routes -->|response: 201 { song }| HTTPClient --> UI
+
+    %% Playback / Controls (clarified)
+    MoodComp -->|preview audio (per-item element)| PerItemAudio["Per-item <audio> (preview)"]
+    PerItemAudio -->|plays locally| MoodComp
+    MoodComp -->|addToQueue / controls| App
+    App -->|authoritative playback commands| AudioEl
+    App -->|exposes API (add/play/pause/seek)| MoodComp
+
+    %% ----- Privacy note -----
+    Privacy["Privacy: models downloaded at runtime;\nno camera frames are sent to server"]
+    FaceComp --- Privacy
+
+    %% (no future nodes — diagram lists only implemented components)
+
+  %% Notes about packages used
+  classDef pkg fill:#fff6e6,stroke:#c76b00,color:#222
+  class FaceComp,Models pkg
+  class HTTPClient pkg
+  class Server,Routes,Multer,Storage,DB pkg
+
+  %% Packages legend (compact)
+  subgraph Packages [Packages]
+    direction TB
+    PkgFace["face-api.js\n@tensorflow/tfjs"]
+    PkgHTTP["axios / fetch"]
+    PkgServer["express / multer / mongoose"]
+    PkgStorage["ImageKit SDK"]
+  end
+  PkgFace --- FaceComp
+  PkgHTTP --- HTTPClient
+  PkgServer --- Server
+  PkgStorage --- Storage
+
+  %% Styling
+  style Browser fill:#f7fbff,stroke:#1f6fb3
+  style Backend fill:#fff9f2,stroke:#c76b00
+  style Packages fill:#0f1113,stroke:#444,color:#ddd
+
+  %% Clickable shortcuts (when opened in editors that support it)
+  click Routes "./backend/src/routes/song.routes.js" "Open route file"
+  click Models "./public/models" "Open models folder"
+
+  %% End

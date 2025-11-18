@@ -1,0 +1,15 @@
+{
+  "main.jsx": "Bootstraps the React app and mounts <App/> into the DOM; enables routing via BrowserRouter.",
+  "App.jsx": "Application shell, routing, and PlayerContext: holds global player state (queue, index, playing), exposes playback controls, and renders pages and the bottom ribbon player.",
+  "styles.css": "Global stylesheet: theme, layout, navbar, player ribbon, shared utilities used across pages/components.",
+  "components/FacialExpression.jsx": "Camera + face-expression detector: loads face-api models, accesses webcam, runs detection and requests mood-based recommendations from backend.",
+  "components/FacialExpression.css": "Styles for the facial expression camera UI and video feed.",
+  "components/MoodSongs.jsx": "Renders mood-based song recommendations and per-track controls (play/pause, seek). Integrates with PlayerContext for volume and queue operations.",
+  "components/MoodSongs.css": "Styles for song cards, per-track progress/range, mood badge, and list layout.",
+  "components/SearchPanel.jsx": "Search input and small UI block used by the Search page to query songs and update parent state.",
+  "pages/Search.jsx": "Search/home page: lets users search for songs (iTunes) and add previews to the queue.",
+  "pages/TopSongs.jsx": "Top Songs page: displays ranked/horizontal list of popular tracks with quick-play controls.",
+  "pages/About.jsx": "About page: explains the app, privacy notes, and contribution guidance.",
+  "pages/Contact.jsx": "Contact page: contact information or feedback form for the project.",
+  "public/models": "Pretrained face-api models (weights/manifests) used by the camera component for expression and face detection; loaded by the client at runtime."
+}

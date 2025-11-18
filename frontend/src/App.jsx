@@ -100,11 +100,9 @@ export default function App() {
   // Stop player on /mood
   useEffect(() => {
     if (isMood) {
+      // Pause playback while on the Moody Player page, but keep queue/mood intact
       audioRef.current?.pause();
-      if (audioRef.current) audioRef.current.src = "";
       setPlaying(false);
-      setQueue([]);
-      setIndex(-1);
     }
   }, [isMood]);
 
@@ -151,9 +149,9 @@ export default function App() {
                   {/* Left column */}
                   <FacialExpression setSongs={setSongs} setMood={setMood} />
                   {/* Right column */}
-                  <div className="panel right-col">
-                    <MoodSongs Songs={Songs} mood={mood} />
-                  </div>
+                    <div className="panel right-col">
+                      <MoodSongs Songs={Songs} mood={mood} />
+                    </div>
                 </div>
               }
             />
@@ -239,6 +237,7 @@ export default function App() {
           onLoadedMetadata={() => {}}
           style={{ display: "none" }}
         />
+        {/* removed fixed global volume — panel-local control handles volume on /mood */}
       </div>
     </PlayerContext.Provider>
   );

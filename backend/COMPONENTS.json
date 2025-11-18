@@ -1,0 +1,9 @@
+{
+  "server.js": "Entry point. Loads .env, connects to the DB, and starts the Express server on port 3000.",
+  "src/app.js": "Creates the Express app, applies JSON parsing and CORS middleware, and mounts song-related routes.",
+  "src/db/db.js": "Mongoose DB connection helper that reads MONGODB_URL and connects to MongoDB.",
+  "src/models/song.model.js": "Mongoose schema/model for song documents (title, artist, audio URL, mood).",
+  "src/routes/song.routes.js": "Express routes: POST /songs to upload a song, GET /songs to fetch songs by mood.",
+  "src/service/storage.service.js": "Uploads file buffers to ImageKit and returns the hosted file metadata (including URL).",
+  "package.json": "Lists dependencies (express, mongoose, multer, imagekit) used by the backend."
+}
